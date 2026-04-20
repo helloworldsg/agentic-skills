@@ -1,28 +1,52 @@
-# Spec-to-Test Generation: Best Practices Research
+---
+name: writing-test-spec
+description: Generates test specifications from feature specifications using best practices synthesized from Hermes Agent, Oh My OpenAgent, Anthropic Skills, OpenAI Codex, Aider, Google Testing, and BDD/SBE/ATDD methodologies. Covers 7 core spec→test patterns, unified pipeline, optimal spec structure, and quality gates.
+version: 1.0.0
+author: Hermes Agent (research synthesis)
+license: MIT
+metadata:
+  hermes:
+    tags: [testing, test-specification, spec-to-test, BDD, TDD, test-generation, feature-specs]
+    related_skills: [agentic-planning, test-driven-development, writing-plans]
+    sources:
+      - NousResearch/hermes-agent — design principles as test axioms, execution flow as test paths, explicit test deletion lists, hermetic testing
+      - code-yeongyu/oh-my-openagent — Given/When/Then grammar, factory pattern = testable, lifecycle diagrams → describe blocks, auto-regenerated specs
+      - Anthropic Skills — expectations schema with grading, baseline comparison, non-discriminating test detection, evals.json
+      - OpenAI Codex — SKILL.md + AGENTS.md, sandbox-aware test execution
+      - Aider — exercism exercises (tests ARE spec), benchmark runner, tests as irreversible specification
+      - Google Testing Philosophy — test sizes (small/medium/large), Beyoncé Rule, 80/15/5 pyramid
+      - BDD/SBE/ATDD — Given/When/Then, Example Mapping, ubiquitous language, specs as single source of truth
+---
 
-A comprehensive analysis of how leading agentic AI frameworks and established software engineering methodologies approach generating test specifications from feature specifications.
+# Writing Test Specifications — Best Practices Synthesis
+
+Distilled from 7+ agentic frameworks and established software engineering methodologies.
+
+**Core axiom:** *Tests derived from design principles survive refactors; tests derived from implementation details do not.* Every successful framework generates tests from spec intent, not from code structure.
 
 ---
 
-## 1. comparative matrix: Frameworks vs. Methodologies
+## When to Use
 
-| Framework | Spec Format | Test Derivation | Automation | BDD/TDD | Eval Infrastructure | Key Innovation |
-|-----------|------------|----------------|------------|---------|---------------------|----------------|
-| **Hermes Agent** | Layered: `.plans/`, `docs/specs/`, `plans/` | Design principles → test names; execution flow → test paths; edge cases → negative tests | Manual but structured (explicit spec→test mapping) | Phased TDD per implementation phase | Hermetic conftest, 5-invariant runner script | **Explicit test deletion lists** in specs |
-| **Oh My OpenAgent** | Auto-gen `AGENTS.md` (3-level: root→module→feature) | 1:1 spec property → test file mapping; lifecycle diagrams → describe blocks | Auto-gen specs from code; Sisyphus AI agent creates tests | Enforced Given/When/Then comments | CI mock-isolation; Bun test with lifecycle management | **Factory pattern** = testable by construction |
-| **Anthropic Skills** | `SKILL.md` (YAML + Markdown) + `evals/` | Intent → expectations → assertions (grader subagent) | **Highest**: skill-creator, auto-grading, A/B benchmarking | Specs-as-expectations; iterative refinement | evals.json, grading.json, benchmark.json, comparison.json | **Baseline comparison mandatory** for every test |
-| **OpenAI Codex** | `SKILL.md` + `AGENTS.md` | Skills define test execution infra; conventions as implicit specs | Medium (remote test execution, sandbox) | AGENTS.md as coding conventions | Docker/devbox isolation, sandbox env vars | Sandbox-aware test execution |
-| **Aider** | Exercism exercises (tests ARE spec) | Tests ARE spec; "fix code, don't change tests" | Medium (benchmark runner, Docker-based) | Strong TDD inversion | benchmark.py, Docker, failure feedback | **Tests as irreversible specification** |
-| **CrewAI** | Agent role/goal + Task expected_output | Manual output verification | Low | None built-in | Human review | Task-level expected_output |
-| **LangGraph** | Graph topology + State schema | Verify state transitions through graph | Low | None built-in | Execution tracing | Schema-as-contract |
+**Always use when:**
+- Writing feature specifications that need test coverage
+- Generating tests from specs for new or existing features
+- Converting vague requirements into verifiable test cases
+- Planning test suites with proper size/scope classification
+
+**Never skip when:**
+- Feature spec mentions design principles (principles = test axioms)
+- Multi-step execution flows exist (each step = test paths)
+- Lifecycle/state transitions are defined (each transition = describe block)
+- Simplifying/removing features (deletion lists prevent test rot)
 
 ---
 
-## 2. The Seven Core Patterns for Spec→Test Generation
+## The 7 Core Patterns for Spec→Test Generation
 
 ### Pattern 1: Design Principles as Test Axioms (Hermes Agent)
 
-**How it works:** Each numbered design principle in the spec becomes one or more named test cases.
+Each numbered design principle in the spec becomes one or more named test cases.
 
 ```
 Spec says:
@@ -40,7 +64,7 @@ Tests generated:
 
 ### Pattern 2: Execution Flow as Test Path Map (Hermes Agent)
 
-**How it works:** Each numbered step in the spec's execution flow becomes a testable path with success + failure variants.
+Each numbered step in the spec's execution flow becomes a testable path with success + failure variants.
 
 ```
 Spec execution flow:
@@ -58,7 +82,7 @@ Tests generated:
 
 ### Pattern 3: Given/When/Then as Structured Grammar (Oh My OpenAgent, BDD/Gherkin)
 
-**How it works:** Specs are expressed (or parsed into) Given/When/Then structure, creating a formal grammar for test generation.
+Specs are expressed (or parsed into) Given/When/Then structure, creating a formal grammar for test generation.
 
 ```typescript
 // given
@@ -73,7 +97,7 @@ expect(limit).toBe(5)
 
 ### Pattern 4: Expectations Schema with Grading (Anthropic Skills)
 
-**How it works:** The `evals.json` schema bridges spec intent to test verification:
+The `evals.json` schema bridges spec intent to test verification:
 
 ```json
 {
@@ -96,7 +120,7 @@ expect(limit).toBe(5)
 
 ### Pattern 5: Factory Pattern = Testable by Construction (Oh My OpenAgent)
 
-**How it works:** Every component uses `createXXX()` factories with explicit inputs/outputs, making test derivation natural:
+Every component uses `createXXX()` factories with explicit inputs/outputs, making test derivation natural:
 
 - `createXXXTool()` → tools with testable inputs
 - `createXXXHook(input: PluginInput)` → hooks with injectable config
@@ -106,7 +130,7 @@ expect(limit).toBe(5)
 
 ### Pattern 6: Explicit Test Deletion Lists (Hermes Agent)
 
-**How it works:** When features simplify, specs enumerate which tests to DELETE with justification:
+When features simplify, specs enumerate which tests to DELETE with justification:
 
 ```
 Tests to delete:
@@ -120,7 +144,7 @@ Tests to delete:
 
 ### Pattern 7: Lifecycle Diagrams → Test Describe Blocks (Oh My OpenAgent)
 
-**How it works:** Behavioral lifecycle diagrams in specs map directly to test describe blocks:
+Behavioral lifecycle diagrams in specs map directly to test describe blocks:
 
 ```
 Spec lifecycle:
@@ -137,9 +161,7 @@ Test structure:
 
 ---
 
-## 3. The Unified Spec→Test Pipeline
-
-Synthesized from all frameworks and methodologies:
+## The Unified Spec→Test Pipeline
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -180,14 +202,14 @@ Synthesized from all frameworks and methodologies:
                        │
           ┌────────────▼────────────┐
           │   STEP 6: VALIDATE      │  - Baseline comparison (with/without)
-          │   (Quality Gate)        │  - Flag non-discriminating tests
+          │   (Quality Gate)       │  - Flag non-discriminating tests
           │                        │  - Verify no shortcut-taking
           │                        │  - Confirm assertions match principles
           └────────────┬───────────┘
                        │
           ┌────────────▼────────────┐
           │   STEP 7: ITERATE       │  - Run tests → analyze failures
-          │   (Refinement Loop)     │  - Feed failures back to spec
+          │   (Refinement Loop)    │  - Feed failures back to spec
           │                        │  - Improve spec + tests
           │                        │  - Re-run until stable
           └────────────────────────┘
@@ -195,9 +217,9 @@ Synthesized from all frameworks and methodologies:
 
 ---
 
-## 4. Feature Spec Structure That Enables Test Generation
+## Feature Spec Structure That Enables Test Generation
 
-Based on analysis of all frameworks, the optimal feature spec structure for test derivation:
+The optimal feature spec structure for test derivation:
 
 ```markdown
 # Feature: [Name]
@@ -277,7 +299,7 @@ What this feature accomplishes and why.
 
 ---
 
-## 5. Key Quality Principles
+## Key Quality Principles
 
 ### From Hermes Agent
 - **Specs own the test plan** — Test cases written directly into feature specs, not derived separately
@@ -319,7 +341,7 @@ What this feature accomplishes and why.
 
 ---
 
-## 6. Anti-Patterns to Avoid
+## Anti-Patterns to Avoid
 
 | Anti-Pattern | Source | Why It's Bad |
 |-------------|--------|-------------|
@@ -335,7 +357,7 @@ What this feature accomplishes and why.
 
 ---
 
-## 7. Tooling & Schema Recommendations
+## Tooling & Schema Recommendations
 
 ### Evaluations Schema (Anthropic Skills — most complete)
 ```json
@@ -388,9 +410,9 @@ What this feature accomplishes and why.
 
 ---
 
-## 8. Practical Recommendations for Building a Spec→Test System
+## Practical Recommendations
 
-1. **Start with the spec format** — Use the structure in Section 4. Include design principles, execution flow, edge cases, AND test specifications all in one document.
+1. **Start with the spec format** — Use the structure above. Include design principles, execution flow, edge cases, AND test specifications all in one document.
 
 2. **Derive tests from principles, not features** — A feature is a bag of behaviors; a principle is a testable axiom. Generate one or more test cases per principle.
 
@@ -404,8 +426,55 @@ What this feature accomplishes and why.
 
 7. **Require baseline comparison** — For AI-generated tests, always run against a baseline (without the feature/skill). Flag non-discriminating tests.
 
-8. **Use the expectations schema** — The Anthropic `{id, prompt, expected_output, expectations[]}` format is the most complete bridge from spec intent to test verification discovered.
+8. **Use the expectations schema** — The Anthropic `{id, prompt, expected_output, expectations[]}` format is the most complete bridge from spec intent to test verification.
 
 9. **Enforce hermeticity at the infrastructure level** — Blank credentials, isolate filesystem, pin deterministic runtime vars. Make it impossible to write non-hermetic tests.
 
 10. **Iterate in phases** — Break test development into phases matching implementation. Each phase merges independently with its own test section and line estimates.
+
+---
+
+## Integration with Related Skills
+
+### With agentic-planning skill
+When planning features, include the test specification structure from this skill in the plan document. The plan's task list should reference specific test names from the spec's Test Specification section.
+
+### With test-driven-development skill
+Every code-producing task follows TDD: write failing test → verify failure → write minimal code → verify pass → commit. The test spec generated by this skill provides the test names and acceptance criteria for TDD.
+
+### With writing-plans skill
+Include test specifications as part of the plan document structure. Each task's "Done when:" should reference specific test names from the spec. Test line estimates feed directly into the plan's phase estimates.
+
+---
+
+## Test Spec Checklist
+
+Before finalizing a test specification, verify:
+
+- [ ] Every design principle has one or more test cases
+- [ ] Every execution flow step has success + failure variants
+- [ ] Every lifecycle transition has a describe block
+- [ ] All tests are classified by size (small/medium/large) AND scope (unit/integration/E2E)
+- [ ] Test pyramid is approximately 80/15/5 (unit/integration/E2E)
+- [ ] Negative assertions are included (not just "does X" but "does NOT do Y")
+- [ ] Edge cases and error conditions are covered
+- [ ] Feature flag states are tested (enabled + disabled)
+- [ ] Deletion lists are included when simplifying features
+- [ ] Phase plan includes test line estimates alongside implementation estimates
+- [ ] Hermeticity invariants are specified (blank credentials, isolated FS, deterministic runtime)
+- [ ] Baseline comparison is defined for AI-generated tests
+- [ ] Given/When/Then structure is used throughout
+- [ ] Test names derive from principles/flows, not implementation details
+- [ ] No hallucinated assertions — every assertion traces to a spec principle or flow step
+
+---
+
+## Sources
+
+- **Hermes Agent** — design principles as test axioms, execution flow as test paths, explicit test deletion lists, hermetic testing, phased test development
+- **Oh My OpenAgent** — Given/When/Then grammar enforcement, factory pattern = testable, lifecycle diagrams → describe blocks, auto-regenerated specs, complexity taxonomy
+- **Anthropic Skills** — expectations schema with grading, baseline comparison mandatory, non-discriminating test detection, iterative refinement, programmatic grading
+- **OpenAI Codex** — SKILL.md + AGENTS.md, sandbox-aware test execution, Docker/devbox isolation
+- **Aider** — exercism exercises (tests ARE spec), benchmark runner, tests as irreversible specification
+- **Google Testing Philosophy** — test sizes (small/medium/large), Beyoncé Rule, 80/15/5 pyramid, size ≠ scope
+- **BDD/SBE/ATDD** — Given/When/Then, Example Mapping, ubiquitous language, specs as single source of truth
