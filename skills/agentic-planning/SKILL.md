@@ -1,6 +1,6 @@
 ---
 name: agentic-planning
-description: Comprehensive agentic planning skill synthesizing best practices from Hermes Agent, Oh My OpenAgent, Skills.sh, CrewAI, LangGraph, OpenHands, MetaGPT, Aider, Anthropic CLI, AutoGPT, and AgentProtocol. Covers plan-before-execute, ambiguity reduction, task decomposition, review loops, error recovery, and wisdom accumulation.
+description: Comprehensive agentic planning skill synthesizing best practices from Hermes Agent, Oh My OpenAgent, Skills.sh, CrewAI, LangGraph, OpenHands, MetaGPT, Aider, Anthropic CLI, AutoGPT, AgentProtocol, and BMAD. Covers plan-before-execute, ambiguity reduction, task decomposition, review loops, error recovery, wisdom accumulation, progressive document context, implementation readiness gates, step-file architecture, sprint status state machines, and story file context engines.
 version: 1.0.0
 author: Hermes Agent (research synthesis)
 license: MIT
@@ -19,6 +19,7 @@ metadata:
       - Aider — architect/coder separation, CONVENTIONS.md
       - MetaGPT — SOP-driven multi-agent, role-document-role handoff
       - AgentProtocol — universal task-step execution standard
+      - BMAD-METHOD — context engineering via progressive documents, implementation readiness gate, step-file architecture, story file context engine, adversarial review layers, sprint status state machine
 ---
 
 # Agentic Planning — Best Practices Synthesis
@@ -218,10 +219,117 @@ During execution, accumulate learnings for future tasks and sessions:
 
 ---
 
+## BMAD Context-Engineering Disciplines
+
+BMAD (Build More Architect Dreams) treats planning as **context engineering**: each phase produces a durable document that becomes the input for the next. This progressive handoff prevents the tacit-knowledge loss that occurs when agents switch contexts or sessions reset.
+
+### Progressive Document Context (The Artifact Chain)
+
+| Phase | Document | Purpose | Informs |
+|-------|----------|---------|---------|
+| Analysis | `brainstorming-report.md`, `product-brief.md`, `prfaq.md` | Validate the idea before committing resources | PRD |
+| Planning | `PRD.md`, `ux-spec.md` | Define what to build and for whom | Architecture |
+| Solutioning | `architecture.md`, `epics.md`, `story-[id].md` | Decide how to build it; break into implementable stories | Implementation |
+| Implementation | `sprint-status.yaml`, working code | Track state and produce working software | QA / Review |
+
+**Core rule:** Never let an implementation agent operate without the story file, architecture excerpt, and `project-context.md` loaded. These are not optional references; they are the *execution boundary*.
+
+### Implementation Readiness Gate
+
+Before any code is written, validate that PRD, UX, Architecture, Epics, and Stories are complete and aligned. Run an explicit gap check:
+
+- [ ] PRD acceptance criteria are unambiguous and traceable to stories
+- [ ] Architecture decisions cover tech stack, patterns, security, and testing standards
+- [ ] Epics logically group stories by user value
+- [ ] Every story has: user story statement, ACs (Given/When/Then), technical requirements, edge cases, dependencies
+- [ ] `project-context.md` exists with coding standards and framework rules
+
+**If the gate fails, do not proceed to implementation.** Fix the planning document.
+
+### Step-File Architecture (Micro-File Design)
+
+For complex workflows, decompose execution into self-contained step files loaded **just-in-time**:
+
+| Rule | Rationale |
+|------|-----------|
+| **One step file at a time** | Prevents context flooding and premature optimization |
+| **Read the entire step file before acting** | Ensures all guardrails and preconditions are understood |
+| **Never skip or reorder steps** | Agents that "optimize" sequences miss safety checks |
+| **Track state in document frontmatter** | `stepsCompleted` array survives session boundaries |
+| **Append-only building** | Add to artifacts incrementally; never rewrite mid-workflow |
+| **Halt at checkpoints** | Wait for human input at every decision gate |
+
+This pattern is essential when the workflow exceeds a single agent turn or when human-in-the-loop checkpoints are required between steps.
+
+### Story File as Master Implementation Guide
+
+A BMAD story file is not a simple task list. It is a **comprehensive context engine** that prevents developer mistakes, omissions, and disasters:
+
+**Required sections:**
+- **Story** — user story statement (As a..., I want..., so that...)
+- **Acceptance Criteria** — Given/When/Then, BDD formatted
+- **Tasks/Subtasks** — numbered, checkboxed, 2–5 min of focused work each
+- **Dev Notes** — architecture requirements, library versions, patterns, constraints
+- **Dev Agent Record** — Debug Log, Implementation Plan, Completion Notes
+- **File List** — every new/modified/deleted file (paths relative to repo root)
+- **Change Log** — summary of what changed and why
+- **Status** — `backlog → ready-for-dev → in-progress → review → done`
+
+**Rule:** The dev agent may modify **only** Tasks/Subtasks checkboxes, Dev Agent Record, File List, Change Log, and Status. All other sections are read-only guardrails.
+
+### Sprint Status State Machine
+
+Track work in `sprint-status.yaml` (or equivalent):
+
+```yaml
+development_status:
+  epic-1: in-progress
+  1-1-user-auth: done
+  1-2-account-mgmt: review
+  1-3-profile-edit: in-progress
+```
+
+**Transitions:**
+- Epic: `backlog → in-progress` (when first story is created) `→ done`
+- Story: `backlog → ready-for-dev → in-progress → review → done`
+- Never downgrade status (e.g., `done` back to `in-progress`).
+- Epic moves to `in-progress` when its first story is created.
+- Story moves to `review` only after all tasks pass and regression tests are green.
+
+### Review Continuation Pattern
+
+When a developer resumes work after a code review, the story file must contain a **Senior Developer Review (AI)** section. The dev agent:
+
+1. Detects the review section and sets `review_continuation = true`
+2. Extracts unchecked action items with severity breakdown (High/Med/Low counts)
+3. Prioritizes review follow-up tasks (marked `[AI-Review]`) *before* regular tasks
+4. Marks both the Tasks checkbox and the corresponding Review Action Item checkbox when resolved
+5. Adds resolution notes to the Dev Agent Record
+
+This prevents reviewed findings from being lost between sessions.
+
+### Deferred Work Tracking
+
+Not every finding must be fixed immediately. Create `{implementation_artifacts}/deferred-work.md`:
+
+```markdown
+## Deferred from: code review of story-3.3 (2026-03-18)
+- [x] [Review][Defer] Missing rate limiting on /login — deferred, pre-existing
+```
+
+Categorize deferred items during triage. This prevents scope creep while ensuring pre-existing issues are catalogued for future sprints.
+
+### Fresh-Chat Protocol
+
+**Every workflow must start in a fresh chat.** Context decay and cross-workflow contamination cause agents to apply the wrong patterns. This is non-negotiable for:
+- Agent handoffs (PM → Architect → Developer → QA)
+- Review workflows (prefer a *different* LLM from implementation)
+- Analysis vs. implementation phases
+
 ## Core Principles (Synthesized)
 
-### 1. Plan-Before-Execute (CrewAI + Aider + AutoGPT)
-Always produce a plan artifact before acting. Even a simple numbered list of steps catches 80% of misunderstandings early. Never execute on the first turn if the task has more than 1 step.
+### 1. Context-Before-Execute (BMAD + CrewAI + Aider + AutoGPT)
+Always produce a plan artifact before acting. Even a simple numbered list of steps catches 80% of misunderstandings early. Never execute on the first turn if the task has more than 1 step. For complex work, load the full artifact chain (story file + architecture + project context) before writing code.
 
 ### 2. Define "Done" Explicitly (CrewAI expected_output)
 The single most effective ambiguity reduction technique. Every task must state what success looks like in concrete, measurable terms. If you cannot define "done," the task is too ambiguous to start.
@@ -287,6 +395,13 @@ Before finalizing, verify:
 - [ ] Risky tasks have rollback procedures
 - [ ] DRY, YAGNI, TDD principles applied
 - [ ] Plan passes Momus-style 4-criteria review (Clarity 100%, Verification 90%+, Context 10% or less guesswork, Big Picture clear)
+- [ ] Implementation readiness gate passed (PRD + Architecture + Epics aligned)
+- [ ] Story file sections complete: Story, ACs, Tasks, Dev Notes, Dev Agent Record, File List, Change Log, Status
+- [ ] `project-context.md` loaded (if exists)
+- [ ] Sprint status state machine understood and statuses correct
+- [ ] Review continuation detected and handled (if applicable)
+- [ ] Deferred work file created (if applicable)
+- [ ] Fresh chat confirmed for this workflow
 - [ ] Wisdom accumulation strategy is defined (where to record learnings)
 
 ---
@@ -350,3 +465,4 @@ This covers the 80/20: intent classification, assumption surfacing, acceptance c
 - **MetaGPT** — SOP-driven multi-agent, role-document-role handoff chains
 - **AutoGPT** — Block composition, AgentProtocol task-step API
 - **AgentProtocol** — Universal task-step execution standard (OpenAPI spec)
+- **BMAD-METHOD** — Context engineering via progressive documents, implementation readiness gate, step-file architecture, adversarial review layers (Blind Hunter, Edge Case Hunter, Acceptance Auditor), sprint status state machine, story file context engine, review continuation pattern, deferred work tracking

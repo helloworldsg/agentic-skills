@@ -1,6 +1,6 @@
 ---
 name: writing-test-spec
-description: Generates test specifications from feature specifications using best practices synthesized from Hermes Agent, Oh My OpenAgent, Anthropic Skills, OpenAI Codex, Aider, Google Testing, and BDD/SBE/ATDD methodologies. Covers 7 core spec→test patterns, unified pipeline, optimal spec structure, and quality gates.
+description: Generates test specifications from feature specifications using best practices synthesized from Hermes Agent, Oh My OpenAgent, Anthropic Skills, OpenAI Codex, Aider, Google Testing, BDD/SBE/ATDD, and BMAD methodologies. Covers 12 core spec→test patterns (including BMAD two-track strategy, red-green-refactor, semantic locators, risk-based prioritization), unified pipeline, optimal spec structure, and quality gates.
 version: 1.0.0
 author: Hermes Agent (research synthesis)
 license: MIT
@@ -16,6 +16,7 @@ metadata:
       - Aider — exercism exercises (tests ARE spec), benchmark runner, tests as irreversible specification
       - Google Testing Philosophy — test sizes (small/medium/large), Beyoncé Rule, 80/15/5 pyramid
       - BDD/SBE/ATDD — Given/When/Then, Example Mapping, ubiquitous language, specs as single source of truth
+      - BMAD-METHOD — two-track testing strategy (built-in QA vs TEA), story-level red-green-refactor, epic-level guardrail generation, semantic locators, risk-based P0-P3 prioritization, requirements traceability, adversarial review layers
 ---
 
 # Writing Test Specifications — Best Practices Synthesis
@@ -158,6 +159,154 @@ Test structure:
   describe("completed/error")    → test terminal states
   describe("cancelled/interrupt") → test cleanup flows
 ```
+
+### Pattern 8: Two-Track Testing Strategy (BMAD)
+
+BMAD distinguishes between **story-level guardrail testing** (unit/integration tests written during implementation via red-green-refactor) and **epic-level guardrail testing** (API/E2E tests generated after the epic is complete). This prevents spec-to-test drift.
+
+| Track | When to Run | Scope | Approach |
+|-------|-------------|-------|----------|
+| **Built-in QA** | After epic completion | API + E2E | Detect framework, scan features, generate happy path + 1–2 errors |
+| **Test Architect (TEA)** | Enterprise/regulated domains | Strategy + ATDD + NFR + Traceability | Risk-based P0–P3 prioritization, quality gates, requirements mapping |
+
+**Default:** Use built-in QA for small–medium projects. Install TEA only when you need requirements traceability, formal quality gates, or compliance documentation.
+
+### Pattern 9: Story-Level Red-Green-Refactor (Built-in Discipline)
+
+Every task in a story follows strict TDD. Tests are derived from the story file's **Tasks/Subtasks** and **Acceptance Criteria**, not from the spec alone:
+
+1. **RED** — Write failing tests for the task/subtask *before* implementation
+2. **Confirm failure** — validates test correctness and defines "done"
+3. **GREEN** — Implement minimal code to make tests pass
+4. **REFACTOR** — Improve structure while keeping tests green
+
+**Critical rules:**
+- Never implement anything not mapped to a specific task/subtask
+- Never proceed to the next task until the current one is complete AND tests pass
+- Never mark a task complete unless tests ACTUALLY exist and pass
+
+### Pattern 10: Epic-Level Guardrail Test Generation (Code-Derived)
+
+After all stories in an epic are implemented and code-reviewed, generate tests **from the codebase**, not from potentially stale specs:
+
+| Step | Action | Output |
+|------|--------|--------|
+| 1 | Detect test framework from `package.json` / build files and existing tests | Framework + patterns |
+| 2 | Identify features (user specifies or auto-discover from codebase) | Feature list |
+| 3 | Generate API tests | Status codes, response structure, happy path + 1–2 errors |
+| 4 | Generate E2E tests | User workflows, semantic locators, visible outcomes |
+| 5 | Run and fix failures immediately | Verified test suite |
+
+This pattern catches implementation drift that spec-derived tests cannot.
+
+### Pattern 11: Semantic Locators & Test Maintainability
+
+For E2E tests generated at epic level (or any UI test), enforce these maintainability rules:
+
+| Do | Don't |
+|----|-------|
+| Use semantic locators (`role=`, `label=`, text content) | CSS selectors or XPath |
+| Assert visible outcomes | Assert implementation internals or DOM structure |
+| Keep tests independent (no shared state or order dependencies) | Chain tests or rely on setup sequence |
+| Use standard framework APIs only | Custom abstractions or external test utilities |
+| Clear descriptions that read as documentation | Vague or single-word test names |
+| No hardcoded waits or sleeps | `setTimeout` or arbitrary delays |
+
+### Pattern 12: Risk-Based Prioritization (TEA)
+
+TEA uses a Probability × Impact matrix to objectively score risk from 1–9, then maps scores to P0–P3 test priorities.
+
+**Risk Score = Probability × Impact**
+
+| Probability | 1 (Low) | 2 (Medium) | 3 (High) |
+|-------------|---------|------------|----------|
+| **Impact 1 (Low)** | 1 | 2 | 3 |
+| **Impact 2 (Medium)** | 2 | 4 | 6 |
+| **Impact 3 (High)** | 3 | 6 | **9** |
+
+**Risk categories to assess:** TECH (technical debt), SEC (security), PERF (performance), DATA (integrity), BUS (business logic), OPS (operational).
+
+**Gate Rules by Score:**
+
+| Score | Rating | Mitigation Required | Gate Impact |
+|-------|--------|---------------------|-------------|
+| **9** | Critical | Mandatory; blocks release | **FAIL** if no mitigation |
+| **6–8** | High | Documented plan required | **CONCERNS** if incomplete |
+| **4–5** | Medium | Recommended | Advisory only |
+| **1–3** | Low | Optional | No impact |
+
+**Priority Mapping:**
+
+| Priority | Typical Scores | Coverage Target | Test Levels |
+|----------|--------------|-----------------|-------------|
+| **P0** | 6–9 | 100% | E2E + API |
+| **P1** | 4–6 | 90% | API + selective E2E |
+| **P2** | 2–4 | 50% | API happy path |
+| **P3** | 1–2 | 20% smoke | E2E smoke only |
+
+Map every test back to a requirement ID for traceability and audit compliance.
+
+### Pattern 13: Dual-Mode Test Design (System + Epic)
+
+TEA produces test designs at two resolutions. Use both; never skip system-level review.
+
+**System-Level (Phase 3) — TWO documents:**
+1. **`test-design-architecture.md`** — For architects/devs: testability gaps, NFR requirements, ASRs, blockers with 🚨/⚠️/📋 severity.
+2. **`test-design-qa.md`** — For QA execution: environment requirements, testability prerequisites, Sprint 0 setup, P0–P3 coverage plan with checkboxes.
+
+**Epic-Level (Phase 4) — ONE document:**
+- **`test-design-epic-N.md`** — Combined risk assessment + coverage plan focused on regression hotspots (brownfield) or compliance alignment (enterprise).
+
+**Why two documents at system level?**
+- Architecture teams scan blockers in <5 min
+- QA teams get actionable execution recipes
+- Cross-references replace duplication
+- Clear separation of "what to deliver" vs "how to test"
+
+### Pattern 14: Network-First Patterns (Determinism)
+
+Eliminate flakiness by waiting for actual network events, not arbitrary timeouts.
+
+**Rule:** Set up the intercept **before** triggering the action.
+
+```typescript
+// ❌ Flaky: hard wait + race condition
+await page.click('button');
+await page.waitForTimeout(2000);
+await expect(page.locator('.success')).toBeVisible();
+
+// ✅ Deterministic: intercept-before-navigate
+const submitPromise = page.waitForResponse(
+  resp => resp.url().includes('/api/submit') && resp.ok()
+);
+await page.click('button');
+await submitPromise;
+await expect(page.locator('.success')).toBeVisible();
+```
+
+**Forbidden in quality tests:**
+- `waitForTimeout` (hard waits)
+- Conditionals for flow control (`if/else` in tests)
+- `try/catch` for flow control
+
+**Benefits:**
+- Waits exactly as long as needed
+- Validates API response before asserting UI
+- Same result in local, CI, and under load
+
+### Pattern 15: Fixture Architecture (Isolation)
+
+Build reusable utilities via pure function → fixture → composition.
+
+1. **Pure function** — Unit-testable, framework-agnostic logic
+2. **Fixture wrapper** — Injects framework context (`page`, `request`)
+3. **Composition** — `mergeTests()` combines fixtures per test file
+
+**Quality payoff:**
+- No global state between tests
+- Self-cleaning (setup + teardown in fixture)
+- Parallel-safe by default
+- Single-concern fixtures vs "god fixtures"
 
 ---
 
@@ -327,6 +476,48 @@ What this feature accomplishes and why.
 - **Smallest viable test** — Generate the smallest-size test that verifies each assertion
 - **80/15/5 pyramid** — Unit / Integration / E2E ratio
 
+### From BMAD Method / TEA
+
+**Two-track testing** — Story-level unit tests via red-green-refactor; epic-level API/E2E tests generated from working code after code review. Never generate epic guardrail tests from stale specs.
+
+**Red-green-refactor as law** — Generate red-phase scaffolds with `test.skip()` before implementation. Activate them task-by-task: remove skip → confirm RED → implement → confirm GREEN → refactor.
+
+**Dual-mode test design** — System-level produces two focused documents (architecture review + QA execution recipe). Epic-level produces one combined plan. Cross-reference instead of duplicate.
+
+**Risk scoring** — Probability × Impact = 1–9. Scores ≥6 require documented mitigation. Score 9 blocks release.
+
+**Quality Standards (5 principles + scoring / 100 points):**
+
+| Principle | Weight | Requirements |
+|-----------|--------|--------------|
+| **Determinism** | 35 pts | No hard waits, no conditionals, no try/catch flow control. Network-first patterns only. |
+| **Isolation** | 25 pts | Self-cleaning, no global state, parallel-safe, unique test data. |
+| **Explicit Assertions** | 20 pts | Assertions visible in test body (not hidden in helpers). Specific, not generic `toBeTruthy`. |
+| **Focused** | 10 pts | Single responsibility, <300 lines, clear describe/test names. |
+| **Fast** | 10 pts | <90 seconds per test, efficient selectors (`getByRole` over XPath), minimal redundant actions. |
+
+| Total Score | Interpretation |
+|-------------|----------------|
+| 90–100 | Excellent — production-ready |
+| 80–89 | Good — minor improvements |
+| 70–79 | Acceptable — address before release |
+| 60–69 | Needs work — fix critical issues |
+| <60 | Critical — significant refactoring |
+
+**Semantic locators by default** — No CSS selectors or XPath for UI tests. Use `role=`, `label=`, text content only.
+
+**Requirements traceability** — Every epic-level test maps back to a PRD requirement or AC.
+
+**Adversarial review layers** — Blind Hunter catches obvious test bugs; Acceptance Auditor verifies tests match ACs; Edge Case Hunter finds missing boundary tests.
+
+**Definition of Done enforcement** — Story cannot be marked `review` unless all tests pass with no regressions.
+
+**Deferred test work** — Pre-existing test gaps are catalogued in `deferred-work.md`, not silently ignored.
+
+**Fresh-chat QA runs** — Test generation and review workflows run in new sessions to avoid implementation bias.
+
+**Detect, don't assume** — Scan `package.json` and existing tests to infer framework and conventions rather than imposing defaults.
+
 ### From BDD/SBE/ATDD
 - **Specs as single source of truth** — Same examples serve as requirements AND tests
 - **Example Mapping** — Systematically discover edge cases via "what if?" questions
@@ -354,6 +545,17 @@ What this feature accomplishes and why.
 | Imperative specs | BDD | "Click button X, enter text Y" breaks when UI changes |
 | Single-size thinking | Google | All tests at same size level ignores hermeticity/fidelity tradeoff |
 | Spec-code-test drift | SBE | When specs, code, and tests evolve independently |
+| No-story-test mapping | BMAD | Tasks without corresponding tests violate red-green-refactor |
+| Spec-derived guardrail tests | BMAD | Generating epic tests from stale specs instead of working code |
+| CSS-selectors in E2E | BMAD | Fragile locators break when UI structure changes |
+| Order-dependent tests | BMAD | Shared state between tests creates hidden failures |
+| Hardcoded waits | BMAD | `sleep()` makes tests slow and flaky |
+| Try/catch flow control | TEA | Hides real failures, creates non-deterministic behavior |
+| Conditional assertions | TEA | `if/else` in tests → flaky, unreproducible results |
+| God fixtures | TEA | Single fixture with 50 methods → unmaintainable, not composable |
+| Slop factory outputs | TEA | Redundant coverage + incorrect assertions from prompt-driven generation |
+| API-last E2E-first | TEA | Generating browser tests before backend tests wastes time and masks API bugs |
+| Skipping regression check | BMAD | Marking story review without running full existing suite |
 
 ---
 
@@ -466,6 +668,24 @@ Before finalizing a test specification, verify:
 - [ ] Given/When/Then structure is used throughout
 - [ ] Test names derive from principles/flows, not implementation details
 - [ ] No hallucinated assertions — every assertion traces to a spec principle or flow step
+- [ ] Two-track strategy selected (built-in QA vs TEA) and documented
+- [ ] Story-level red-green-refactor followed for every task
+- [ ] Epic-level tests generated from code after review, not from stale specs
+- [ ] Semantic locators used for all UI/E2E tests
+- [ ] Risk-based P0–P3 prioritization applied (if using TEA)
+- [ ] Requirements traceability matrix maintained (if using TEA)
+- [ ] Adversarial review layers run on test suite (Blind Hunter, Edge Case Hunter, Acceptance Auditor)
+- [ ] Definition of Done testing gates pass before marking story `review`
+- [ ] System-level test design produces architecture doc + QA doc (TEA dual-mode)
+- [ ] No hard waits (`waitForTimeout`) in generated tests
+- [ ] No conditionals or try/catch used for flow control in tests
+- [ ] Network-first patterns applied (intercept-before-navigate)
+- [ ] Fixtures follow pure-function → wrapper → composition pattern
+- [ ] Test quality score estimated/validated > 80 before release
+- [ ] Determinism validated: same result in local, CI, and under load
+- [ ] Isolation validated: tests run in parallel, in any order, with unique data
+- [ ] ATDD scaffolds generated with `test.skip()` and activated task-by-task
+- [ ] API tests generated before or alongside E2E tests (not after)
 
 ---
 
@@ -478,3 +698,5 @@ Before finalizing a test specification, verify:
 - **Aider** — exercism exercises (tests ARE spec), benchmark runner, tests as irreversible specification
 - **Google Testing Philosophy** — test sizes (small/medium/large), Beyoncé Rule, 80/15/5 pyramid, size ≠ scope
 - **BDD/SBE/ATDD** — Given/When/Then, Example Mapping, ubiquitous language, specs as single source of truth
+- **BMAD-METHOD** — two-track testing strategy (built-in QA vs TEA), red-green-refactor discipline, epic-level guardrail generation from code, semantic locators, adversarial review layers (Blind Hunter, Edge Case Hunter, Acceptance Auditor), risk-based P0-P3 prioritization, requirements traceability, implementation readiness gate, story file context engine, sprint status state machine, deferred work tracking
+- **BMAD-TEA (Test Architect)** — Probability × Impact risk scoring matrix (1–9), dual-mode test design (architecture doc + QA doc), test quality standards (5 principles / 100-point scoring), network-first intercept-before-navigate pattern, pure-function→fixture→composition architecture, ATDD red-phase scaffolds with task-by-task activation, engagement models (No TEA / Solo / Lite / Integrated), quality gate rules (FAIL/CONCERNS/Advisory)
