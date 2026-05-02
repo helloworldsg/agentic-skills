@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>The Agentic Blueprint</title>
   <style>
     :root {
@@ -14,7 +14,7 @@
       --muted: #94a3b8;
       --shadow: rgba(0,0,0,0.5);
     }
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html, body {
       margin: 0; padding: 0;
       width: 100%; height: 100%;
@@ -24,26 +24,31 @@
       overflow: hidden;
       user-select: none;
       -webkit-user-select: none;
+      touch-action: manipulation;
     }
 
     /* Slide Stage */
     #stage {
       position: relative;
-      width: 100%; height: 100%;
+      width: 100%; height: 100vh; /* fallback */
+      height: 100dvh;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 60px 80px 80px;
+      padding: 52px 8px 64px;
     }
     .slide {
       position: absolute;
-      max-width: 100%; max-height: 100%;
+      inset: 52px 8px 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       opacity: 0;
-      transform: scale(0.96) translateY(10px);
-      transition: opacity 0.35s ease, transform 0.35s ease;
+      transform: scale(0.96) translateY(8px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
       pointer-events: none;
-      border-radius: 12px;
-      box-shadow: 0 20px 60px var(--shadow);
+      border-radius: 10px;
+      overflow: hidden;
     }
     .slide.active {
       opacity: 1;
@@ -53,9 +58,13 @@
     }
     .slide img {
       display: block;
-      max-width: 100%; max-height: calc(100vh - 140px);
-      width: auto; height: auto;
-      border-radius: 12px;
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      border-radius: 10px;
+      box-shadow: 0 12px 40px var(--shadow);
     }
 
     /* Navigation Buttons */
@@ -63,10 +72,12 @@
       position: fixed;
       top: 50%;
       transform: translateY(-50%);
-      width: 48px; height: 48px;
+      width: 44px; height: 44px;
       border: none;
       border-radius: 50%;
-      background: var(--panel);
+      background: rgba(30,41,59,0.85);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
       color: var(--text);
       cursor: pointer;
       display: flex;
@@ -74,41 +85,48 @@
       justify-content: center;
       z-index: 10;
       opacity: 0;
-      transition: opacity 0.2s ease, background 0.2s ease;
+      transition: opacity 0.2s ease, background 0.2s ease, transform 0.2s ease;
       box-shadow: 0 4px 12px var(--shadow);
     }
-    body:hover .nav-btn { opacity: 0.7; }
+    body:hover .nav-btn { opacity: 0.6; }
     .nav-btn:hover { opacity: 1 !important; background: var(--accent); color: #fff; }
-    #prevBtn { left: 18px; }
-    #nextBtn { right: 18px; }
-    .nav-btn svg { width: 24px; height: 24px; fill: currentColor; }
+    .nav-btn:active { transform: translateY(-50%) scale(0.92); }
+    #prevBtn { left: 10px; }
+    #nextBtn { right: 10px; }
+    .nav-btn svg { width: 22px; height: 22px; fill: currentColor; }
 
     /* Bottom Bar */
     #bottomBar {
       position: fixed;
       bottom: 0; left: 0; right: 0;
-      height: 60px;
+      height: 52px;
       background: linear-gradient(to top, rgba(15,23,42,0.95), rgba(15,23,42,0));
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 16px;
+      gap: 12px;
       z-index: 10;
-      padding: 0 20px;
+      padding: 0 12px;
     }
     #counter {
-      font-size: 14px;
+      font-size: 13px;
       color: var(--muted);
-      min-width: 60px;
+      min-width: 50px;
       text-align: center;
       font-variant-numeric: tabular-nums;
     }
     #dots {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       align-items: center;
+      max-width: 60vw;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
     }
+    #dots::-webkit-scrollbar { display: none; }
     .dot {
+      flex-shrink: 0;
       width: 8px; height: 8px;
       border-radius: 50%;
       background: var(--muted);
@@ -128,39 +146,43 @@
     /* Thumbnails Toggle */
     #thumbToggle {
       position: fixed;
-      bottom: 14px;
-      left: 18px;
+      bottom: 10px;
+      left: 12px;
       z-index: 11;
-      background: var(--panel);
+      background: rgba(30,41,59,0.85);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
       border: none;
       border-radius: 8px;
       color: var(--text);
-      padding: 8px 14px;
-      font-size: 13px;
+      padding: 7px 12px;
+      font-size: 12px;
       cursor: pointer;
       opacity: 0.7;
       transition: opacity 0.2s, background 0.2s;
       box-shadow: 0 4px 12px var(--shadow);
     }
     #thumbToggle:hover { opacity: 1; background: var(--accent); color: #fff; }
+    #thumbToggle:active { transform: scale(0.95); }
 
     /* Thumbnails Panel */
     #thumbPanel {
       position: fixed;
       top: 0; left: 0; bottom: 0;
-      width: 220px;
+      width: 200px;
       background: var(--panel);
       transform: translateX(-100%);
       transition: transform 0.3s ease;
       z-index: 20;
       overflow-y: auto;
-      padding: 16px;
+      padding: 14px;
       box-shadow: 4px 0 24px var(--shadow);
+      -webkit-overflow-scrolling: touch;
     }
     #thumbPanel.open { transform: translateX(0); }
     #thumbPanel h3 {
-      margin: 0 0 16px;
-      font-size: 14px;
+      margin: 0 0 14px;
+      font-size: 13px;
       color: var(--muted);
       text-transform: uppercase;
       letter-spacing: 0.05em;
@@ -200,7 +222,7 @@
     #topBar {
       position: fixed;
       top: 0; left: 0; right: 0;
-      height: 52px;
+      height: 48px;
       background: linear-gradient(to bottom, rgba(15,23,42,0.9), rgba(15,23,42,0));
       display: flex;
       align-items: center;
@@ -210,7 +232,7 @@
     }
     #topBar h1 {
       margin: 0;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 500;
       color: var(--muted);
       letter-spacing: 0.02em;
@@ -219,28 +241,43 @@
     /* Keyboard hint */
     #hint {
       position: fixed;
-      bottom: 70px;
+      bottom: 62px;
       left: 50%;
       transform: translateX(-50%);
       background: var(--panel);
       color: var(--muted);
-      padding: 6px 14px;
+      padding: 5px 12px;
       border-radius: 20px;
-      font-size: 12px;
+      font-size: 11px;
       opacity: 0;
       transition: opacity 1s ease 2s;
       z-index: 5;
       pointer-events: none;
     }
-    body:hover #hint { opacity: 0.6; }
+    body:hover #hint { opacity: 0.5; }
 
-    @media (max-width: 640px) {
-      #stage { padding: 50px 12px 70px; }
-      .nav-btn { width: 40px; height: 40px; }
-      #prevBtn { left: 6px; }
-      #nextBtn { right: 6px; }
-      #thumbPanel { width: 180px; }
-      .slide img { max-height: calc(100vh - 120px); }
+    /* ========================
+       DESKTOP OVERRIDES
+       ======================== */
+    @media (min-width: 769px) {
+      #stage { padding: 60px 80px 80px; }
+      .slide { inset: auto; max-width: 100%; max-height: 100%; border-radius: 12px; }
+      .slide img { max-height: calc(100vh - 140px); border-radius: 12px; }
+      .nav-btn { width: 48px; height: 48px; }
+      #prevBtn { left: 18px; }
+      #nextBtn { right: 18px; }
+      #thumbPanel { width: 220px; padding: 16px; }
+      #bottomBar { height: 60px; padding: 0 20px; }
+      #thumbToggle { bottom: 14px; left: 18px; padding: 8px 14px; font-size: 13px; }
+      #counter { font-size: 14px; min-width: 60px; }
+      #topBar { height: 52px; }
+      #topBar h1 { font-size: 16px; }
+      #hint { bottom: 70px; font-size: 12px; padding: 6px 14px; }
+    }
+
+    /* Touch-device fallback: always show nav buttons at low opacity */
+    @media (hover: none) {
+      .nav-btn { opacity: 0.55; }
     }
   </style>
 </head>
@@ -343,12 +380,13 @@
     function openThumbs() { thumbPanel.classList.add('open'); overlay.classList.add('visible'); }
     function closeThumbs() { thumbPanel.classList.remove('open'); overlay.classList.remove('visible'); }
 
-    // Events
+    // Click/tap events
     document.getElementById('prevBtn').onclick = prev;
     document.getElementById('nextBtn').onclick = next;
     document.getElementById('thumbToggle').onclick = openThumbs;
     overlay.onclick = closeThumbs;
 
+    // Keyboard
     document.addEventListener('keydown', e => {
       if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); next(); }
       else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prev(); }
@@ -358,17 +396,54 @@
       else if (e.key.toLowerCase() === 't') { thumbPanel.classList.contains('open') ? closeThumbs() : openThumbs(); }
     });
 
-    // Touch swipe
-    let touchStartX = 0;
-    document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive:true});
+    /* ========== Touch Swipe ========== */
+    let touchStartX = 0, touchStartY = 0, touchStartTime = 0;
+    let isSwiping = false;
+
+    document.addEventListener('touchstart', e => {
+      if (e.touches.length !== 1) return;
+      touchStartX = e.touches[0].screenX;
+      touchStartY = e.touches[0].screenY;
+      touchStartTime = Date.now();
+      isSwiping = false;
+    }, { passive: true });
+
+    document.addEventListener('touchmove', e => {
+      if (e.touches.length !== 1) return;
+      const dx = e.touches[0].screenX - touchStartX;
+      const dy = e.touches[0].screenY - touchStartY;
+      // Determine if this is a horizontal swipe
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 10) {
+        isSwiping = true;
+      }
+    }, { passive: true });
+
     document.addEventListener('touchend', e => {
+      if (!isSwiping) return;
       const dx = e.changedTouches[0].screenX - touchStartX;
-      if (Math.abs(dx) > 50) {
+      const dt = Date.now() - touchStartTime;
+      const velocity = Math.abs(dx) / (dt || 1);
+      // Swipe if distance > 40px OR velocity-based quick flick
+      if (Math.abs(dx) > 40 || (Math.abs(dx) > 20 && velocity > 0.5)) {
         dx < 0 ? next() : prev();
       }
-    }, {passive:true});
+      isSwiping = false;
+    }, { passive: true });
 
-    // Preload first 3 images eagerly via link rel preload
+    /* ========== Tap zones for navigation ========== */
+    // Left 25% of screen = prev, right 25% = next (only on touch devices)
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (isTouch) {
+      stage.addEventListener('touchend', e => {
+        if (isSwiping) return; // ignore if it was a swipe
+        const x = e.changedTouches[0].clientX;
+        const w = window.innerWidth;
+        if (x < w * 0.22) prev();
+        else if (x > w * 0.78) next();
+      }, { passive: true });
+    }
+
+    // Preload first 3 images
     for (let i = 0; i < Math.min(3, TOTAL); i++) {
       const link = document.createElement('link');
       link.rel = 'preload'; link.as = 'image'; link.href = imgPath(i);
