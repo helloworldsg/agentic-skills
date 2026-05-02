@@ -3,34 +3,377 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Agentic Skills</title>
+  <title>The Agentic Blueprint</title>
   <style>
-    body {
+    :root {
+      --bg: #0f172a;
+      --panel: #1e293b;
+      --accent: #38bdf8;
+      --accent-hover: #0ea5e9;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --shadow: rgba(0,0,0,0.5);
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0;
+      width: 100%; height: 100%;
+      background: var(--bg);
+      color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* Slide Stage */
+    #stage {
+      position: relative;
+      width: 100%; height: 100%;
       display: flex;
-      justify-content: center;
       align-items: center;
-      height: 100vh;
-      margin: 0;
-      background: #0f172a;
-      color: #e2e8f0;
+      justify-content: center;
+      padding: 60px 80px 80px;
     }
-    .container {
+    .slide {
+      position: absolute;
+      max-width: 100%; max-height: 100%;
+      opacity: 0;
+      transform: scale(0.96) translateY(10px);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      pointer-events: none;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px var(--shadow);
+    }
+    .slide.active {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      pointer-events: auto;
+      z-index: 2;
+    }
+    .slide img {
+      display: block;
+      max-width: 100%; max-height: calc(100vh - 140px);
+      width: auto; height: auto;
+      border-radius: 12px;
+    }
+
+    /* Navigation Buttons */
+    .nav-btn {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 48px; height: 48px;
+      border: none;
+      border-radius: 50%;
+      background: var(--panel);
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      opacity: 0;
+      transition: opacity 0.2s ease, background 0.2s ease;
+      box-shadow: 0 4px 12px var(--shadow);
+    }
+    body:hover .nav-btn { opacity: 0.7; }
+    .nav-btn:hover { opacity: 1 !important; background: var(--accent); color: #fff; }
+    #prevBtn { left: 18px; }
+    #nextBtn { right: 18px; }
+    .nav-btn svg { width: 24px; height: 24px; fill: currentColor; }
+
+    /* Bottom Bar */
+    #bottomBar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 60px;
+      background: linear-gradient(to top, rgba(15,23,42,0.95), rgba(15,23,42,0));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      z-index: 10;
+      padding: 0 20px;
+    }
+    #counter {
+      font-size: 14px;
+      color: var(--muted);
+      min-width: 60px;
       text-align: center;
+      font-variant-numeric: tabular-nums;
     }
-    h1 {
-      font-size: 2.5rem;
-      margin-bottom: 0.5rem;
+    #dots {
+      display: flex;
+      gap: 8px;
+      align-items: center;
     }
-    p {
-      color: #94a3b8;
+    .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--muted);
+      opacity: 0.4;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      border: none;
+      padding: 0;
+    }
+    .dot.active {
+      opacity: 1;
+      background: var(--accent);
+      transform: scale(1.3);
+    }
+    .dot:hover { opacity: 0.8; }
+
+    /* Thumbnails Toggle */
+    #thumbToggle {
+      position: fixed;
+      bottom: 14px;
+      left: 18px;
+      z-index: 11;
+      background: var(--panel);
+      border: none;
+      border-radius: 8px;
+      color: var(--text);
+      padding: 8px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      opacity: 0.7;
+      transition: opacity 0.2s, background 0.2s;
+      box-shadow: 0 4px 12px var(--shadow);
+    }
+    #thumbToggle:hover { opacity: 1; background: var(--accent); color: #fff; }
+
+    /* Thumbnails Panel */
+    #thumbPanel {
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      width: 220px;
+      background: var(--panel);
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      z-index: 20;
+      overflow-y: auto;
+      padding: 16px;
+      box-shadow: 4px 0 24px var(--shadow);
+    }
+    #thumbPanel.open { transform: translateX(0); }
+    #thumbPanel h3 {
+      margin: 0 0 16px;
+      font-size: 14px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .thumb {
+      width: 100%;
+      aspect-ratio: 16/9;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 10px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: border-color 0.2s, transform 0.2s;
+      background: var(--bg);
+    }
+    .thumb img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .thumb:hover { transform: scale(1.02); }
+    .thumb.active { border-color: var(--accent); }
+
+    /* Overlay */
+    #overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      z-index: 15;
+    }
+    #overlay.visible { opacity: 1; pointer-events: auto; }
+
+    /* Top title */
+    #topBar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 52px;
+      background: linear-gradient(to bottom, rgba(15,23,42,0.9), rgba(15,23,42,0));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      pointer-events: none;
+    }
+    #topBar h1 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+
+    /* Keyboard hint */
+    #hint {
+      position: fixed;
+      bottom: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--panel);
+      color: var(--muted);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      opacity: 0;
+      transition: opacity 1s ease 2s;
+      z-index: 5;
+      pointer-events: none;
+    }
+    body:hover #hint { opacity: 0.6; }
+
+    @media (max-width: 640px) {
+      #stage { padding: 50px 12px 70px; }
+      .nav-btn { width: 40px; height: 40px; }
+      #prevBtn { left: 6px; }
+      #nextBtn { right: 6px; }
+      #thumbPanel { width: 180px; }
+      .slide img { max-height: calc(100vh - 120px); }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Agentic Skills</h1>
-    <p>Coming soon</p>
+
+  <div id="topBar"><h1>The Agentic Blueprint</h1></div>
+
+  <div id="stage"></div>
+
+  <button id="prevBtn" class="nav-btn" aria-label="Previous slide">
+    <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+  </button>
+  <button id="nextBtn" class="nav-btn" aria-label="Next slide">
+    <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+  </button>
+
+  <div id="overlay"></div>
+
+  <button id="thumbToggle">Thumbnails</button>
+  <div id="thumbPanel">
+    <h3>Slides</h3>
+    <div id="thumbs"></div>
   </div>
+
+  <div id="bottomBar">
+    <span id="counter">1 / 15</span>
+    <div id="dots"></div>
+  </div>
+
+  <div id="hint">← → to navigate · Esc for overview</div>
+
+  <script>
+    const TOTAL = 15;
+    const stage = document.getElementById('stage');
+    const counter = document.getElementById('counter');
+    const dotsContainer = document.getElementById('dots');
+    const thumbsContainer = document.getElementById('thumbs');
+    const thumbPanel = document.getElementById('thumbPanel');
+    const overlay = document.getElementById('overlay');
+    let current = 0;
+
+    function imgPath(i) {
+      return `images/slide_${String(i+1).padStart(2,'0')}.jpg`;
+    }
+
+    // Build slides
+    for (let i = 0; i < TOTAL; i++) {
+      const slide = document.createElement('div');
+      slide.className = 'slide' + (i === 0 ? ' active' : '');
+      slide.innerHTML = `<img src="${imgPath(i)}" alt="Slide ${i+1}" loading="${i < 3 ? 'eager' : 'lazy'}">`;
+      stage.appendChild(slide);
+
+      // Dot
+      const dot = document.createElement('button');
+      dot.className = 'dot' + (i === 0 ? ' active' : '');
+      dot.ariaLabel = `Go to slide ${i+1}`;
+      dot.onclick = () => goTo(i);
+      dotsContainer.appendChild(dot);
+
+      // Thumbnail
+      const thumb = document.createElement('div');
+      thumb.className = 'thumb' + (i === 0 ? ' active' : '');
+      thumb.innerHTML = `<img src="${imgPath(i)}" alt="Thumb ${i+1}" loading="lazy">`;
+      thumb.onclick = () => { goTo(i); closeThumbs(); };
+      thumbsContainer.appendChild(thumb);
+    }
+
+    const slides = document.querySelectorAll('.slide');
+    const dots = document.querySelectorAll('.dot');
+    const thumbs = document.querySelectorAll('.thumb');
+
+    function update() {
+      slides.forEach((s, i) => s.classList.toggle('active', i === current));
+      dots.forEach((d, i) => d.classList.toggle('active', i === current));
+      thumbs.forEach((t, i) => t.classList.toggle('active', i === current));
+      counter.textContent = `${current + 1} / ${TOTAL}`;
+
+      // Scroll active thumb into view
+      if (thumbPanel.classList.contains('open')) {
+        thumbs[current].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
+      // Preload neighbors
+      [current - 1, current + 1].forEach(idx => {
+        if (idx >= 0 && idx < TOTAL) {
+          const img = slides[idx].querySelector('img');
+          if (img.loading === 'lazy') img.loading = 'eager';
+        }
+      });
+    }
+
+    function goTo(index) {
+      if (index < 0 || index >= TOTAL) return;
+      current = index;
+      update();
+    }
+    function next() { if (current < TOTAL - 1) goTo(current + 1); }
+    function prev() { if (current > 0) goTo(current - 1); }
+
+    function openThumbs() { thumbPanel.classList.add('open'); overlay.classList.add('visible'); }
+    function closeThumbs() { thumbPanel.classList.remove('open'); overlay.classList.remove('visible'); }
+
+    // Events
+    document.getElementById('prevBtn').onclick = prev;
+    document.getElementById('nextBtn').onclick = next;
+    document.getElementById('thumbToggle').onclick = openThumbs;
+    overlay.onclick = closeThumbs;
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); next(); }
+      else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prev(); }
+      else if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+      else if (e.key === 'End') { e.preventDefault(); goTo(TOTAL - 1); }
+      else if (e.key === 'Escape') { closeThumbs(); }
+      else if (e.key.toLowerCase() === 't') { thumbPanel.classList.contains('open') ? closeThumbs() : openThumbs(); }
+    });
+
+    // Touch swipe
+    let touchStartX = 0;
+    document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive:true});
+    document.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].screenX - touchStartX;
+      if (Math.abs(dx) > 50) {
+        dx < 0 ? next() : prev();
+      }
+    }, {passive:true});
+
+    // Preload first 3 images eagerly via link rel preload
+    for (let i = 0; i < Math.min(3, TOTAL); i++) {
+      const link = document.createElement('link');
+      link.rel = 'preload'; link.as = 'image'; link.href = imgPath(i);
+      document.head.appendChild(link);
+    }
+  </script>
 </body>
 </html>
