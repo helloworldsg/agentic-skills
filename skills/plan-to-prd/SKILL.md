@@ -1,6 +1,6 @@
 ---
 name: plan-to-prd
-description: Turn the current conversation context into a PRD and publish it to the project issue tracker. Use when user wants to create a PRD from the current context.
+description: Turn the current conversation context into a PRD and publish it to the project issue tracker, or add it as a comment when the conversation already provides an existing issue. Use when user wants to create a PRD from the current context.
 ---
 
 This skill takes the current conversation context and codebase understanding and produces a PRD. Do NOT interview the user — just synthesize what you already know.
@@ -15,7 +15,10 @@ A deep module (as opposed to a shallow module) is one which encapsulates a lot o
 
 Check with the user that these modules match their expectations. Check with the user which modules they want tests written for.
 
-3. Write the PRD using the template below, then publish it to the project issue tracker. Apply the `ready-for-agent` triage label - no need for additional triage.
+3. Write the PRD using the template below, then send it to the project issue tracker:
+
+- If an existing issue was provided in the initial conversation, add the PRD as a comment on that issue. Do not publish a new issue or apply triage labels.
+- Otherwise, publish the PRD as a new issue and apply the `ready-for-agent` triage label - no need for additional triage.
 
 <prd-template>
 
