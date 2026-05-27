@@ -16,6 +16,7 @@ For the broader thesis, see [The Agentic Blueprint](https://helloworldsg.github.
 - **Tests that survive refactors**: `/tdd` focuses on public behavior instead of implementation details.
 - **Verification at machine speed**: build around tests, traceable execution, and review gates instead of trusting generated diffs.
 - **Architecture that compounds**: `/improve-codebase-architecture` looks for deeper modules with smaller interfaces, better locality, and clearer test surfaces.
+- **Durable learning**: `/retrospective` consolidates completed work into concise project memory instead of chat summaries.
 - **Cleaner context transfer**: `/handoff` compacts the current conversation into a redacted temporary handoff document for the next agent or session.
 
 ## Install
@@ -27,7 +28,7 @@ npx skills@latest add helloworldsg/agentic-skills
 ## Recommended Workflow
 
 ```text
-/plan -> /prototype -> /plan-to-prd -> /plan-to-issues -> /tdd -> /handoff
+/plan -> -> /plan-to-prd -> /plan-to-issues -> /tdd -> /retrospective
 ```
 
 This maps to the agentic engineering loop:
@@ -38,6 +39,7 @@ This maps to the agentic engineering loop:
 | Explore | Answer risky design, state-model, or UI questions with throwaway experiments. | `/prototype` |
 | Execute | Convert shared context into PRDs and vertical-slice issues that agents can work on independently. | `/plan-to-prd`, `/plan-to-issues` |
 | Verify | Implement one behavior at a time and prove it through public interfaces. | `/tdd` |
+| Reflect | Preserve durable lessons, rules, and decisions in their source-of-truth files. | `/retrospective` |
 | Transfer | Preserve useful context for the next session without duplicating existing artifacts. | `/handoff` |
 
 The point is not to outsource understanding. The engineer still owns taste, architecture, evaluation, and security posture. The agent handles more of the execution loop.
@@ -53,6 +55,7 @@ Use `/prototype` when the plan still has a sharp unknown. Once the question is a
 | `/plan-to-prd` | Convert the current context into a PRD that an implementation agent can use. |
 | `/plan-to-issues` | Break a plan or PRD into small, dependency-aware vertical-slice issues. |
 | `/tdd` | Build features or fix bugs one behavior at a time with tests through public interfaces. |
+| `/retrospective` | Consolidate durable session learnings into source-of-truth project memory. |
 | `/improve-codebase-architecture` | Find refactoring opportunities that make modules deeper, more testable, and easier for agents to navigate. |
 | `/create-skill` | Create new skills with clear triggers, structure, and supporting resources. |
 | `/handoff` | Save a compact, redacted handoff document in the OS temp directory so another agent can continue. |
