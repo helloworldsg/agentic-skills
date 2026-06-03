@@ -10,6 +10,7 @@ For the broader thesis, see [The Agentic Blueprint](https://helloworldsg.github.
 
 - **Agentic engineering over vibe coding**: replace prompt-and-hope with structured planning, execution, and verification.
 - **Less vague planning**: `/plan` stress-tests ideas against the codebase, project vocabulary, and ADRs.
+- **Broader option discovery**: `/plan-divergent` uses isolated frame-based branches plus a critic pass to avoid premature convergence on architecture, API, naming, and fuzzy-debugging decisions.
 - **Faster design learning**: `/prototype` creates throwaway logic or UI experiments so teams can answer uncertain questions before hardening an implementation.
 - **Better agent handoffs**: `/plan-to-prd` and `/plan-to-issues` turn context into PRDs and independently grabbable implementation tickets.
 - **Smaller, safer delivery**: issues are sliced as tracer bullets, so each one produces a narrow end-to-end path that can be verified on its own.
@@ -28,7 +29,7 @@ npx skills@latest add helloworldsg/agentic-skills
 ## Recommended Workflow
 
 ```text
-/plan -> -> /plan-to-prd -> /plan-to-issues -> /tdd -> /retrospective
+/plan -> /plan-divergent -> /prototype -> /plan-to-prd -> /plan-to-issues -> /tdd -> /retrospective
 ```
 
 This maps to the agentic engineering loop:
@@ -36,7 +37,7 @@ This maps to the agentic engineering loop:
 | Phase | Goal | Skill |
 | --- | --- | --- |
 | Plan | Define intent, domain language, constraints, and architectural boundaries. | `/plan` |
-| Explore | Answer risky design, state-model, or UI questions with throwaway experiments. | `/prototype` |
+| Explore | Generate non-obvious options, then answer risky design, state-model, or UI questions with throwaway experiments. | `/plan-divergent`, `/prototype` |
 | Execute | Convert shared context into PRDs and vertical-slice issues that agents can work on independently. | `/plan-to-prd`, `/plan-to-issues` |
 | Verify | Implement one behavior at a time and prove it through public interfaces. | `/tdd` |
 | Reflect | Preserve durable lessons, rules, and decisions in their source-of-truth files. | `/retrospective` |
@@ -44,13 +45,14 @@ This maps to the agentic engineering loop:
 
 The point is not to outsource understanding. The engineer still owns taste, architecture, evaluation, and security posture. The agent handles more of the execution loop.
 
-Use `/prototype` when the plan still has a sharp unknown. Once the question is answered, delete the prototype or fold the validated decision into production work before moving into issues and implementation.
+Use `/plan-divergent` when the obvious answer may be too narrow and the decision is expensive to reverse. Use `/prototype` when the plan still has a sharp unknown. Once the question is answered, delete the prototype or fold the validated decision into production work before moving into issues and implementation.
 
 ## Skills
 
 | Skill | Use it for |
 | --- | --- |
 | `/plan` | Challenge a plan, clarify domain terms, and capture glossary or ADR updates as decisions crystallize. |
+| `/plan-divergent` | Generate, cluster, score, and deepen non-obvious approaches for architecture, API, naming, strategy, and fuzzy-debugging decisions. |
 | `/prototype` | Build a throwaway terminal or UI prototype to answer a specific design, state, or interaction question. |
 | `/plan-to-prd` | Convert the current context into a PRD that an implementation agent can use. |
 | `/plan-to-issues` | Break a plan or PRD into small, dependency-aware vertical-slice issues. |
