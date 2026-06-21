@@ -16,6 +16,7 @@ For the broader thesis, see [The Agentic Blueprint](https://helloworldsg.github.
 - **Tests that survive refactors**: `/tdd` focuses on public behavior instead of implementation details.
 - **Verification at machine speed**: build around tests, traceable execution, and review gates instead of trusting generated diffs.
 - **Architecture that compounds**: `/improve-codebase-architecture` looks for deeper modules with smaller interfaces, better locality, and clearer test surfaces.
+- **Research that hands off cleanly**: `/deep-research` investigates web sources and multiple repositories, then returns compact evidence packets an implementation agent can act on.
 - **Durable learning**: `/retrospective` consolidates completed work into concise project memory instead of chat summaries.
 - **Cleaner context transfer**: `/handoff` compacts the current conversation into a redacted temporary handoff document for the next agent or session.
 
@@ -28,13 +29,14 @@ npx skills@latest add helloworldsg/agentic-skills
 ## Recommended Workflow
 
 ```text
-/plan -> -> /plan-to-prd -> /plan-to-issues -> /tdd -> /retrospective
+/deep-research -> /plan -> /plan-to-prd -> /plan-to-issues -> /tdd -> /retrospective
 ```
 
 This maps to the agentic engineering loop:
 
 | Phase | Goal | Skill |
 | --- | --- | --- |
+| Research | Answer risky product, technical, or cross-repo unknowns before hardening a plan. | `/deep-research` |
 | Plan | Define intent, domain language, constraints, and architectural boundaries. | `/plan` |
 | Explore | Answer risky design, state-model, or UI questions with throwaway experiments. | `/prototype` |
 | Execute | Convert shared context into PRDs and vertical-slice issues that agents can work on independently. | `/plan-to-prd`, `/plan-to-issues` |
@@ -50,6 +52,7 @@ Use `/prototype` when the plan still has a sharp unknown. Once the question is a
 
 | Skill | Use it for |
 | --- | --- |
+| `/deep-research` | Research complex questions, current topics, or requirement impact across multiple repositories with compact evidence handoffs. |
 | `/plan` | Challenge a plan, clarify domain terms, and capture glossary or ADR updates as decisions crystallize. |
 | `/prototype` | Build a throwaway terminal or UI prototype to answer a specific design, state, or interaction question. |
 | `/plan-to-prd` | Convert the current context into a PRD that an implementation agent can use. |
@@ -57,6 +60,7 @@ Use `/prototype` when the plan still has a sharp unknown. Once the question is a
 | `/tdd` | Build features or fix bugs one behavior at a time with tests through public interfaces. |
 | `/retrospective` | Consolidate durable session learnings into source-of-truth project memory. |
 | `/improve-codebase-architecture` | Find refactoring opportunities that make modules deeper, more testable, and easier for agents to navigate. |
+| `/tech-lead` | Run multi-task work like a delegating tech lead: clarify, plan, slice into vertical-slice tasks, delegate to sub-agents, gate on quality, and report outcomes. |
 | `/create-skill` | Create new skills with clear triggers, structure, and supporting resources. |
 | `/handoff` | Save a compact, redacted handoff document in the OS temp directory so another agent can continue. |
 | `/caveman` | Switch to an ultra-compressed communication style when you want fewer tokens. |
